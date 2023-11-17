@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hola Mundo</title>
+
+    <style>
+        /* CSS */
+        #tic-tac-toe-board {
+            width: 300px;
+            height: 300px;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: sans-serif;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            width: 100vw;
+            background: #1aaeb9;
+        }
+
+        .cell {
+            background: #fff;
+            border: 1px solid #000;
+            width: 100px;
+            height: 100px;
+            border-radius: 20px;
+            text-align: center;
+            /* alinear el texto al centro tanto en el eje x como en el eje y */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 50px;
+            /*  hacer que las celdas tenga un espaciado entre ellas, sin que dejen de ser cuadradas */
+            box-sizing: border-box;
+            margin: 2px;
+        }
+
+        .cell:hover {
+            cursor: pointer;
+        }
+
+        .row {
+            display: flex;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- HTML -->
+    <div class="container">
+        <h1 style="text-align: center; font-size: 4em;">Tic Tac Toe! ❌⭕</h1>
+
+        <div style="display: flex; align-items: center;">
+            <!--panel con un cronometro y un boton para reiniciar el juego -->
+            <div style="display: flex; justify-content: space-between; width: 300px;">
+                <div id="timer" style="font-size: 4em;">00:00</div>
+            </div>
+
+
+            <!--  tablero -->
+            <div id="tic-tac-toe-board">
+                <div class="row">
+                    <div class="cell"></div>
+                    <div class="cell"></div>
+                    <div class="cell"></div>
+                </div>
+                <div class="row">
+                    <div class="cell"></div>
+                    <div class="cell"></div>
+                    <div class="cell"></div>
+                </div>
+                <div class="row">
+                    <div class="cell"></div>
+                    <div class="cell"></div>
+                    <div class="cell"></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        //funcion para el cronometro, que permita ejecutarlo si es el primer movimiento y detenerlo si se reinicia el juego
+        let timer = document.getElementById('timer');
+        let interval;
+        let time = 0;
+        //funcion getTimerFromSeconds para convertir los segundos en minutos y segundos
+        function getTimeFromSeconds(seconds) {
+            const data = new Date(seconds * 1000);
+            return data.toLocaleTimeString('pt-BR', {
+                hour12: false,
+                timeZone: 'GMT'
+            });
+        }
+        function startTimer() {
+            interval = setInterval(() => {
+                time++;
+                timer.textContent = getTimeFromSeconds(time);
+            }, 1000);
+        }
+        //funcion para detener el cronometro
+        function stopTimer() {
+            clearInterval(interval);
+        }
+        //funcion para reiniciar el cronometro
+        function resetTimer() {
+            stopTimer();
+            time = 0;
+            timer.textContent = getTimeFromSeconds(time);
+        }
+        let board = Array(9).fill(null);
+        let currentPlayer = 'X';
+
+        document.querySelectorAll('.cell').forEach((cell, i) => {
+            cell.addEventListener('click', () => {
+                //iniciar el cronometro si es el primer movimiento
+                if (time === 0) {
+                    startTimer();
+                }
+                if (!cell.textContent && !checkWin(board)) {
+                    cell.textContent = currentPlayer;
+                    board[i] = currentPlayer;
+                    currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+                    if (checkWin(board) !== null) {
+                        Swal.fire({
+                            title: 'Congratulations!',
+                            text: `Player ${checkWin(board)} wins!`,
+                            icon: 'success',
+                            confirmButtonText: 'Cool'
+                        });
+                        clearBoard();
+                        resetTimer();
+                    } else {
+                        //si cada celda tiene un valor diferente de null, significa que el tablero esta lleno
+                        if (board.every(cell => cell !== null)) {
+                            Swal.fire({
+                                title: 'Draw!',
+                                text: 'No one wins!',
+                                icon: 'info',
+                                confirmButtonText: 'Cool'
+                            });
+                            clearBoard();
+                            resetTimer();
+                        }
+
+                    }
+                }
+            });
+        });
+
+
+
+        //funcion para limpiar el tablero
+        function clearBoard() {
+            board = Array(9).fill(null);
+            currentPlayer = 'X';
+            document.querySelectorAll('.cell').forEach(cell => cell.textContent = '');
+        }
+
+        function checkWin(board) {
+            const lines = [
+                [0, 1, 2],
+                [3, 4, 5],
+                [6, 7, 8],
+                [0, 3, 6],
+                [1, 4, 7],
+                [2, 5, 8],
+                [0, 4, 8],
+                [2, 4, 6]
+            ];
+            for (let line of lines) {
+                if (board[line[0]] && board[line[0]] === board[line[1]] && board[line[0]] === board[line[2]]) {
+                    return board[line[0]];
+                }
+            }
+            return null;
+        }
+    </script>
+</body>
+
+</html>
